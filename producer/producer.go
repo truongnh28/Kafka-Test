@@ -66,9 +66,16 @@ func createMessage(ctx *fiber.Ctx) error {
 	}
 	// convert body into bytes and send it to kafka
 	mgsInBytes, _ := json.Marshal(msg)
-	PushMessage("message", mgsInBytes)
+	err := PushMessage("message", mgsInBytes)
+	if err != nil {
+		err = ctx.JSON(&fiber.Map{
+			"success": false,
+			"message": err,
+		})
+		return err
+	}
 	// Return Comment in JSON format
-	err := ctx.JSON(&fiber.Map{
+	err = ctx.JSON(&fiber.Map{
 		"success": true,
 		"message": "Comment pushed successfully",
 		"comment": msg,
